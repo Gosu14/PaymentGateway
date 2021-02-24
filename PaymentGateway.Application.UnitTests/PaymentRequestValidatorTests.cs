@@ -14,7 +14,6 @@ namespace PaymentGateway.Application.UnitTests
     public class PaymentRequestValidatorTests
     {
         public Mock<IDateService> DateServiceMock { get; } = new Mock<IDateService>(MockBehavior.Strict);
-
         public PaymentDemand ValidPaymentDemand { get; } = new PaymentDemand
         {
             Amount = 500,
@@ -22,11 +21,11 @@ namespace PaymentGateway.Application.UnitTests
             PaymentMethod = new PaymentMethod()
             {
                 Brand = "visa",
-                Country = "gb",
-                Cvv = 500,
-                Number = "5555 5555 5555 4444",
-                ExpiryYear = 2025,
-                ExpiryMonth = 11
+                Country = "fr",
+                Cvv = 737,
+                Number = "4977 9494 9494 9497",
+                ExpiryYear = 2030,
+                ExpiryMonth = 03
             }
         };
 
@@ -50,20 +49,8 @@ namespace PaymentGateway.Application.UnitTests
             //Arrange
             this.DateServiceMock.Setup(x => x.CurrentDateTime).Returns(new DateTime(2020, 01, 01));
             var validator = new PaymentRequestValidator(this.DateServiceMock.Object);
-            var invalidPaymentDemand = new PaymentDemand
-            {
-                Amount = 500,
-                Currency = "usd",
-                PaymentMethod = new PaymentMethod()
-                {
-                    Brand = "visa",
-                    Country = "gb",
-                    Cvv = 500,
-                    Number = "5555 5555 5555 4444",
-                    ExpiryYear = 2019,
-                    ExpiryMonth = 11
-                }
-            };
+            var invalidPaymentDemand = this.ValidPaymentDemand;
+            invalidPaymentDemand.PaymentMethod.ExpiryYear = 2019;
 
             //Act
             var result = validator.TestValidate(invalidPaymentDemand);
@@ -78,20 +65,9 @@ namespace PaymentGateway.Application.UnitTests
             //Arrange
             this.DateServiceMock.Setup(x => x.CurrentDateTime).Returns(new DateTime(2020, 02, 01));
             var validator = new PaymentRequestValidator(this.DateServiceMock.Object);
-            var invalidPaymentDemand = new PaymentDemand
-            {
-                Amount = 500,
-                Currency = "usd",
-                PaymentMethod = new PaymentMethod()
-                {
-                    Brand = "visa",
-                    Country = "gb",
-                    Cvv = 500,
-                    Number = "5555 5555 5555 4444",
-                    ExpiryYear = 2020,
-                    ExpiryMonth = 01
-                }
-            };
+            var invalidPaymentDemand = this.ValidPaymentDemand;
+            invalidPaymentDemand.PaymentMethod.ExpiryYear = 2020;
+            invalidPaymentDemand.PaymentMethod.ExpiryMonth = 01;
 
             //Act
             var result = validator.TestValidate(invalidPaymentDemand);
@@ -106,48 +82,8 @@ namespace PaymentGateway.Application.UnitTests
             //Arrange
             this.DateServiceMock.Setup(x => x.CurrentDateTime).Returns(new DateTime(2020, 01, 01));
             var validator = new PaymentRequestValidator(this.DateServiceMock.Object);
-            var invalidPaymentDemand = new PaymentDemand
-            {
-                Amount = 500,
-                Currency = "us",
-                PaymentMethod = new PaymentMethod()
-                {
-                    Brand = "visa",
-                    Country = "gb",
-                    Cvv = 500,
-                    Number = "5555 5555 5555 4444",
-                    ExpiryYear = 2025,
-                    ExpiryMonth = 11
-                }
-            };
-
-            //Act
-            var result = validator.TestValidate(invalidPaymentDemand);
-
-            //Assert
-            result.ShouldHaveValidationErrorFor(paymentDemand => paymentDemand.Currency);
-        }
-
-        [Fact]
-        public void ShouldHaveErrorWhenCurrencyIsNotManaged()
-        {
-            //Arrange
-            this.DateServiceMock.Setup(x => x.CurrentDateTime).Returns(new DateTime(2020, 01, 01));
-            var validator = new PaymentRequestValidator(this.DateServiceMock.Object);
-            var invalidPaymentDemand = new PaymentDemand
-            {
-                Amount = 500,
-                Currency = "zzz",
-                PaymentMethod = new PaymentMethod()
-                {
-                    Brand = "visa",
-                    Country = "gb",
-                    Cvv = 500,
-                    Number = "5555 5555 5555 4444",
-                    ExpiryYear = 2025,
-                    ExpiryMonth = 11
-                }
-            };
+            var invalidPaymentDemand = this.ValidPaymentDemand;
+            invalidPaymentDemand.Currency = "us";
 
             //Act
             var result = validator.TestValidate(invalidPaymentDemand);
@@ -165,20 +101,8 @@ namespace PaymentGateway.Application.UnitTests
             //Arrange
             this.DateServiceMock.Setup(x => x.CurrentDateTime).Returns(new DateTime(2020, 01, 01));
             var validator = new PaymentRequestValidator(this.DateServiceMock.Object);
-            var paymentDemand = new PaymentDemand
-            {
-                Amount = 500,
-                Currency = currency,
-                PaymentMethod = new PaymentMethod()
-                {
-                    Brand = "visa",
-                    Country = "gb",
-                    Cvv = 500,
-                    Number = "5555 5555 5555 4444",
-                    ExpiryYear = 2025,
-                    ExpiryMonth = 11
-                }
-            };
+            var paymentDemand = this.ValidPaymentDemand;
+            paymentDemand.Currency = currency;
 
             //Act
             var result = validator.TestValidate(paymentDemand);
@@ -187,33 +111,6 @@ namespace PaymentGateway.Application.UnitTests
             result.ShouldNotHaveAnyValidationErrors();
         }
 
-        [Fact]
-        public void ShouldHaveErrorWhenCountryIssuingCardIsNotManaged()
-        {
-            //Arrange
-            this.DateServiceMock.Setup(x => x.CurrentDateTime).Returns(new DateTime(2020, 01, 01));
-            var validator = new PaymentRequestValidator(this.DateServiceMock.Object);
-            var invalidPaymentDemand = new PaymentDemand
-            {
-                Amount = 500,
-                Currency = "usd",
-                PaymentMethod = new PaymentMethod()
-                {
-                    Brand = "visa",
-                    Country = "zz",
-                    Cvv = 500,
-                    Number = "5555 5555 5555 4444",
-                    ExpiryYear = 2025,
-                    ExpiryMonth = 11
-                }
-            };
-
-            //Act
-            var result = validator.TestValidate(invalidPaymentDemand);
-
-            //Assert
-            result.ShouldHaveValidationErrorFor(paymentDemand => paymentDemand.PaymentMethod.Country);
-        }
 
         [Fact]
         public void ShouldHaveErrorWhenCountryIssuingCardIsInvalid()
@@ -221,20 +118,8 @@ namespace PaymentGateway.Application.UnitTests
             //Arrange
             this.DateServiceMock.Setup(x => x.CurrentDateTime).Returns(new DateTime(2020, 01, 01));
             var validator = new PaymentRequestValidator(this.DateServiceMock.Object);
-            var invalidPaymentDemand = new PaymentDemand
-            {
-                Amount = 500,
-                Currency = "usd",
-                PaymentMethod = new PaymentMethod()
-                {
-                    Brand = "visa",
-                    Country = "country",
-                    Cvv = 500,
-                    Number = "5555 5555 5555 4444",
-                    ExpiryYear = 2025,
-                    ExpiryMonth = 11
-                }
-            };
+            var invalidPaymentDemand = this.ValidPaymentDemand;
+            invalidPaymentDemand.PaymentMethod.Country = "Country";
 
             //Act
             var result = validator.TestValidate(invalidPaymentDemand);
@@ -252,79 +137,8 @@ namespace PaymentGateway.Application.UnitTests
             //Arrange
             this.DateServiceMock.Setup(x => x.CurrentDateTime).Returns(new DateTime(2020, 01, 01));
             var validator = new PaymentRequestValidator(this.DateServiceMock.Object);
-            var paymentDemand = new PaymentDemand
-            {
-                Amount = 500,
-                Currency = "usd",
-                PaymentMethod = new PaymentMethod()
-                {
-                    Brand = "visa",
-                    Country = country,
-                    Cvv = 500,
-                    Number = "5555 5555 5555 4444",
-                    ExpiryYear = 2025,
-                    ExpiryMonth = 11
-                }
-            };
-
-            //Act
-            var result = validator.TestValidate(paymentDemand);
-
-            //Assert
-            result.ShouldNotHaveAnyValidationErrors();
-        }
-
-        [Fact]
-        public void ShouldHaveErrorWhenCardBrandIsNotManaged()
-        {
-            //Arrange
-            this.DateServiceMock.Setup(x => x.CurrentDateTime).Returns(new DateTime(2020, 01, 01));
-            var validator = new PaymentRequestValidator(this.DateServiceMock.Object);
-            var invalidPaymentDemand = new PaymentDemand
-            {
-                Amount = 500,
-                Currency = "usd",
-                PaymentMethod = new PaymentMethod()
-                {
-                    Brand = "American Express",
-                    Country = "gb",
-                    Cvv = 500,
-                    Number = "5555 5555 5555 4444",
-                    ExpiryYear = 2025,
-                    ExpiryMonth = 11
-                }
-            };
-
-            //Act
-            var result = validator.TestValidate(invalidPaymentDemand);
-
-            //Assert
-            result.ShouldHaveValidationErrorFor(paymentDemand => paymentDemand.PaymentMethod.Brand);
-        }
-
-        public static IEnumerable<object[]> GetValidCardBrand() => PaymentDataConstants.CardBrandManaged.Select(brand => new object[] { brand });
-
-        [Theory]
-        [MemberData(nameof(GetValidCardBrand))]
-        public void ShouldNotHaveErrorWhenCardBrandIsManaged(string brand)
-        {
-            //Arrange
-            this.DateServiceMock.Setup(x => x.CurrentDateTime).Returns(new DateTime(2020, 01, 01));
-            var validator = new PaymentRequestValidator(this.DateServiceMock.Object);
-            var paymentDemand = new PaymentDemand
-            {
-                Amount = 500,
-                Currency = "usd",
-                PaymentMethod = new PaymentMethod()
-                {
-                    Brand = brand,
-                    Country = "gb",
-                    Cvv = 500,
-                    Number = "5555 5555 5555 4444",
-                    ExpiryYear = 2025,
-                    ExpiryMonth = 11
-                }
-            };
+            var paymentDemand = this.ValidPaymentDemand;
+            paymentDemand.PaymentMethod.Country = country;
 
             //Act
             var result = validator.TestValidate(paymentDemand);
@@ -339,20 +153,8 @@ namespace PaymentGateway.Application.UnitTests
             //Arrange
             this.DateServiceMock.Setup(x => x.CurrentDateTime).Returns(new DateTime(2020, 01, 01));
             var validator = new PaymentRequestValidator(this.DateServiceMock.Object);
-            var invalidPaymentDemand = new PaymentDemand
-            {
-                Amount = 500,
-                Currency = "usd",
-                PaymentMethod = new PaymentMethod()
-                {
-                    Brand = "visa",
-                    Country = "gb",
-                    Cvv = 55555,
-                    Number = "5555 5555 5555 4444",
-                    ExpiryYear = 2025,
-                    ExpiryMonth = 11
-                }
-            };
+            var invalidPaymentDemand = this.ValidPaymentDemand;
+            invalidPaymentDemand.PaymentMethod.Cvv = 55555;
 
             //Act
             var result = validator.TestValidate(invalidPaymentDemand);
@@ -367,20 +169,8 @@ namespace PaymentGateway.Application.UnitTests
             //Arrange
             this.DateServiceMock.Setup(x => x.CurrentDateTime).Returns(new DateTime(2020, 01, 01));
             var validator = new PaymentRequestValidator(this.DateServiceMock.Object);
-            var invalidPaymentDemand = new PaymentDemand
-            {
-                Amount = 500,
-                Currency = "usd",
-                PaymentMethod = new PaymentMethod()
-                {
-                    Brand = "visa",
-                    Country = "gb",
-                    Cvv = 555,
-                    Number = "Invalid Card Number",
-                    ExpiryYear = 2025,
-                    ExpiryMonth = 11
-                }
-            };
+            var invalidPaymentDemand = this.ValidPaymentDemand;
+            invalidPaymentDemand.PaymentMethod.Number = "Invalid Card Number";
 
             //Act
             var result = validator.TestValidate(invalidPaymentDemand);
@@ -389,32 +179,5 @@ namespace PaymentGateway.Application.UnitTests
             result.ShouldHaveValidationErrorFor(paymentDemand => paymentDemand.PaymentMethod.Number);
         }
 
-        [Fact]
-        public void ShouldNotHaveErrorWhenCardNumberIsValid()
-        {
-            //Arrange
-            this.DateServiceMock.Setup(x => x.CurrentDateTime).Returns(new DateTime(2020, 01, 01));
-            var validator = new PaymentRequestValidator(this.DateServiceMock.Object);
-            var invalidPaymentDemand = new PaymentDemand
-            {
-                Amount = 500,
-                Currency = "usd",
-                PaymentMethod = new PaymentMethod()
-                {
-                    Brand = "visa",
-                    Country = "gb",
-                    Cvv = 555,
-                    Number = "5555 5555 5555 4444",
-                    ExpiryYear = 2025,
-                    ExpiryMonth = 11
-                }
-            };
-
-            //Act
-            var result = validator.TestValidate(invalidPaymentDemand);
-
-            //Assert
-            result.ShouldNotHaveAnyValidationErrors();
-        }
     }
 }

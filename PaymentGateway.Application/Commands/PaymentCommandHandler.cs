@@ -1,9 +1,12 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentValidation;
+using PaymentGateway.Application.Common.Exceptions;
 using PaymentGateway.Domain.Entities;
 using PaymentGateway.Application.Common.Interfaces;
 using PaymentGateway.Domain.Interfaces;
+using ValidationException = PaymentGateway.Application.Common.Exceptions.ValidationException;
 
 namespace PaymentGateway.Application.Commands
 {
@@ -26,6 +29,7 @@ namespace PaymentGateway.Application.Commands
             var paymentConfirmation = await this.acquiringBankGateway.ProcessPaymentAsync(command);
             await this.dbContext.PaymentConfirmations.AddAsync(paymentConfirmation);
             await this.dbContext.SaveChangesAsync(new CancellationToken());
+            ValidateIfPaymentDeclined(paymentConfirmation);
             return paymentConfirmation;
         }
 
@@ -35,6 +39,14 @@ namespace PaymentGateway.Application.Commands
             if (!validationResult.IsValid)
             {
                 throw new ValidationException(validationResult.Errors);
+            }
+        }
+
+        private static void ValidateIfPaymentDeclined(PaymentConfirmation payment)
+        {
+            if (payment.Status.StartsWith("PAYMENT_DECLINED", StringComparison.InvariantCulture))
+            {
+                throw new PaymentDeclineException(payment);
             }
         }
     }

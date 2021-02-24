@@ -6,11 +6,13 @@ using PaymentGateway.Application.Common.Interfaces;
 using PaymentGateway.Domain.Entities;
 using PaymentGateway.Api.Dto;
 using AutoMapper;
+using PaymentGateway.Api.Filters;
 
 namespace PaymentGateway.Api.Controllers
 {
     [ApiController]
     [Route("payments")]
+    [ApiExceptionFilter]
     public class PaymentController : ControllerBase
     {
         private readonly ILogger<PaymentController> logger;

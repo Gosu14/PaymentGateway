@@ -1,4 +1,5 @@
 using System;
+using System.Numerics;
 using PaymentGateway.Domain.Enums;
 
 namespace PaymentGateway.Api.Dto
@@ -7,7 +8,7 @@ namespace PaymentGateway.Api.Dto
     {
         public Guid Id { get; set; }
         public string Status { get; set; }
-        public int Amount { get; set; }
+        public long Amount { get; set; }
         public string Currency { get; set; }
         public PaymentMethodType Type { get; set; }
         public string CardBrand { get; set; }

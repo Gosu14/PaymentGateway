@@ -36,7 +36,7 @@ namespace PaymentGateway.Application.UnitTests
             var paymentCommandHandler = new PaymentCommandHandler(this.ValidatorMock.Object, this.AcquiringBankGatewayMock.Object, this.dbContext.Object);
 
             //Act - Assert
-            await Assert.ThrowsAsync<ValidationException>(() => paymentCommandHandler.ExecuteAsync(new PaymentDemand()));
+            await Assert.ThrowsAsync<Common.Exceptions.ValidationException>(() => paymentCommandHandler.ExecuteAsync(new PaymentDemand()));
         }
 
         [Fact]

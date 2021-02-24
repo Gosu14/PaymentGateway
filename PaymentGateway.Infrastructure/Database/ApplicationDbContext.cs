@@ -12,11 +12,11 @@ namespace PaymentGateway.Infrastructure.Database
         }
         public DbSet<PaymentConfirmation> PaymentConfirmations { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder builder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
-            base.OnModelCreating(builder);
+            base.OnModelCreating(modelBuilder);
         }
     }
 }
