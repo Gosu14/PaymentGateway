@@ -10,6 +10,6 @@ namespace PaymentGateway.Domain.Entities
         public int ExpiryMonth { get; set; }
         public int ExpiryYear { get; set; }
         public string Number { get; set; }
-        public int Cvv { get; set; }
+        public string Cvv { get; set; }
     }
 }

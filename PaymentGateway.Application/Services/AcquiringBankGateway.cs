@@ -70,7 +70,7 @@ namespace PaymentGateway.Application.Services
             {
                 return PaymentConfirmationCode.PaymentDeclinedCardInvalidExpiryYear;
             }
-            return cardDetail.Cvv != 737 ? PaymentConfirmationCode.PaymentDeclinedCardInvalidCvv : PaymentConfirmationCode.PaymentAccepted;
+            return RemoveWhiteSpaces(cardDetail.Cvv) != "737" ? PaymentConfirmationCode.PaymentDeclinedCardInvalidCvv : PaymentConfirmationCode.PaymentAccepted;
         }
 
         private static string GetVisaCheckConfirmation(PaymentMethod cardDetail)
@@ -87,7 +87,7 @@ namespace PaymentGateway.Application.Services
             {
                 return PaymentConfirmationCode.PaymentDeclinedCardInvalidExpiryYear;
             }
-            return cardDetail.Cvv != 737 ? PaymentConfirmationCode.PaymentDeclinedCardInvalidCvv : PaymentConfirmationCode.PaymentAccepted;
+            return RemoveWhiteSpaces(cardDetail.Cvv) != "737" ? PaymentConfirmationCode.PaymentDeclinedCardInvalidCvv : PaymentConfirmationCode.PaymentAccepted;
         }
 
         private static bool IsStolenCard(PaymentMethod cardDetail)
@@ -96,7 +96,7 @@ namespace PaymentGateway.Application.Services
                 && RemoveWhiteSpaces(cardDetail.Number) is "4000020000000000"
                 && cardDetail.ExpiryYear == 2030
                 && cardDetail.ExpiryMonth == 03
-                && cardDetail.Cvv == 737)
+                && RemoveWhiteSpaces(cardDetail.Cvv) is "737")
             {
                 return true;
             }

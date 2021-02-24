@@ -14,20 +14,27 @@ namespace PaymentGateway.Application.Commands
                 .ExclusiveBetween(0, 1000000000).WithMessage("Amount must be between 0 and 1000000000");
 
             this.RuleFor(v => v.Currency)
+                .NotNull()
                 .NotEmpty().WithMessage("Currency is required")
                 .Length(3).WithMessage("Currency format must be 3 letters (ISO 4217)")
-                .Must(v => PaymentDataConstants.PaymentCurrencyManaged.Contains(v.ToUpperInvariant())).WithMessage("Invalid currency");
+                .Must(v => PaymentDataConstants.PaymentCurrencyManaged.Contains(v?.ToUpperInvariant())).WithMessage("Invalid currency");
 
             this.RuleFor(v => v.PaymentMethod.Cvv)
-                .InclusiveBetween(0, 9999).WithMessage("Card CVC must be between 0 and 9999 included");
+                .MinimumLength(3)
+                .MaximumLength(4)
+                .WithMessage("Card CVC must be between 0 and 9999 included");
 
             this.RuleFor(v => v.PaymentMethod.Brand)
+                .NotNull()
                 .NotEmpty().WithMessage("Card Brand is required");
 
             this.RuleFor(v => v.PaymentMethod.Country)
+                .Must(v => PaymentDataConstants.CountryCardProviderManaged.Contains(v?.ToUpperInvariant()))
+                .WithMessage("Invalid country")
+                .When(v => !string.IsNullOrEmpty(v.PaymentMethod.Country))
+                .NotNull()
                 .NotEmpty().WithMessage("Card country is required")
-                .Length(2).WithMessage("Country code must be 2 letters (ISO 3166-1 alpha-2)")
-                .Must(v => PaymentDataConstants.CountryCardProviderManaged.Contains(v.ToUpperInvariant())).WithMessage("Invalid country");
+                .Length(2).WithMessage("Country code must be 2 letters (ISO 3166-1 alpha-2)");
 
             this.RuleFor(v => v.PaymentMethod.ExpiryYear)
                 .Must(v => v >= dateService.CurrentDateTime.Date.Year).WithMessage("Card is expired");

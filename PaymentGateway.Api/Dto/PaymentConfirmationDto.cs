@@ -1,5 +1,4 @@
 using System;
-using System.Numerics;
 using PaymentGateway.Domain.Enums;
 
 namespace PaymentGateway.Api.Dto

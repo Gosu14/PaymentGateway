@@ -28,7 +28,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentat
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaymentGateway.Application.UnitTests", "PaymentGateway.Application.UnitTests\PaymentGateway.Application.UnitTests.csproj", "{4C8CB04F-5EC6-454A-9953-871618AEF0F2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PaymentGateway.Application.UnitTests", "PaymentGateway.Application.UnitTests\PaymentGateway.Application.UnitTests.csproj", "{4C8CB04F-5EC6-454A-9953-871618AEF0F2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaymentGateway.Api.IntegrationTests", "PaymentGateway.Api.IntegrationTests\PaymentGateway.Api.IntegrationTests.csproj", "{EC743DDD-5A2E-461A-AF3A-13670DDC15C3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -56,6 +58,10 @@ Global
 		{4C8CB04F-5EC6-454A-9953-871618AEF0F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4C8CB04F-5EC6-454A-9953-871618AEF0F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4C8CB04F-5EC6-454A-9953-871618AEF0F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC743DDD-5A2E-461A-AF3A-13670DDC15C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC743DDD-5A2E-461A-AF3A-13670DDC15C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC743DDD-5A2E-461A-AF3A-13670DDC15C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC743DDD-5A2E-461A-AF3A-13670DDC15C3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -66,6 +72,7 @@ Global
 		{FB1F764B-38E7-45C7-A7DE-5A267B30186C} = {5FD793D1-357A-428B-AF25-B6E68942982E}
 		{F91075DA-321E-45C5-B335-A7435A7157ED} = {5FD793D1-357A-428B-AF25-B6E68942982E}
 		{4C8CB04F-5EC6-454A-9953-871618AEF0F2} = {BC4EE07B-8546-4EED-8EC5-D356F83F4223}
+		{EC743DDD-5A2E-461A-AF3A-13670DDC15C3} = {BC4EE07B-8546-4EED-8EC5-D356F83F4223}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {AC186930-57A9-4C84-BE8F-5E5760947251}

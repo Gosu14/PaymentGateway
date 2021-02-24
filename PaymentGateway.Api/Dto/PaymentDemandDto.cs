@@ -12,8 +12,8 @@ namespace PaymentGateway.Api.Dto
     {
         public string CardBrand { get; set; }
         public string CardCountry { get; set; }
-        public string CardExpiryMonth { get; set; }
-        public string CardExpiryYear { get; set; }
+        public int CardExpiryMonth { get; set; }
+        public int CardExpiryYear { get; set; }
         public string CardNumber { get; set; }
         public string CardCvv { get; set; }
     }

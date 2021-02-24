@@ -22,7 +22,7 @@ namespace PaymentGateway.Application.UnitTests
             {
                 Brand = "visa",
                 Country = "fr",
-                Cvv = 737,
+                Cvv = "737",
                 Number = "4977 9494 9494 9497",
                 ExpiryYear = 2030,
                 ExpiryMonth = 03
@@ -154,7 +154,7 @@ namespace PaymentGateway.Application.UnitTests
             this.DateServiceMock.Setup(x => x.CurrentDateTime).Returns(new DateTime(2020, 01, 01));
             var validator = new PaymentRequestValidator(this.DateServiceMock.Object);
             var invalidPaymentDemand = this.ValidPaymentDemand;
-            invalidPaymentDemand.PaymentMethod.Cvv = 55555;
+            invalidPaymentDemand.PaymentMethod.Cvv = "55555";
 
             //Act
             var result = validator.TestValidate(invalidPaymentDemand);

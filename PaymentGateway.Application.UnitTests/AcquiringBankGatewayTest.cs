@@ -16,7 +16,7 @@ namespace PaymentGateway.Application.UnitTests
             {
                 Brand = "visa",
                 Country = "fr",
-                Cvv = 737,
+                Cvv = "737",
                 Number = "4977 9494 9494 9497",
                 ExpiryYear = 2030,
                 ExpiryMonth = 03
@@ -31,7 +31,7 @@ namespace PaymentGateway.Application.UnitTests
             {
                 Brand = "mastercard",
                 Country = "GB",
-                Cvv = 737,
+                Cvv = "737",
                 Number = "5555 5555 5555 4444",
                 ExpiryYear = 2030,
                 ExpiryMonth = 03
@@ -46,7 +46,7 @@ namespace PaymentGateway.Application.UnitTests
             {
                 Brand = "visa",
                 Country = "US",
-                Cvv = 737,
+                Cvv = "737",
                 Number = "4000 0200 0000 0000",
                 ExpiryYear = 2030,
                 ExpiryMonth = 03
@@ -113,7 +113,7 @@ namespace PaymentGateway.Application.UnitTests
         {
             //Arrange
             var unmanagedCard = this.ValidPaymentMastercard;
-            unmanagedCard.PaymentMethod.Cvv = 000;
+            unmanagedCard.PaymentMethod.Cvv = "000";
 
             //Act
             var result = await this.AcquiringBankGateway.ProcessPaymentAsync(unmanagedCard);

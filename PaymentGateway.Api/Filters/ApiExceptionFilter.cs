@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -17,8 +18,8 @@ namespace PaymentGateway.Api.Filters
             {
                 { typeof(ValidationException), this.HandleValidationException },
                 { typeof(PaymentDeclineException), this.HandlePaymentDeclinedException },
-                /*{ typeof(UnauthorizedAccessException), HandleUnauthorizedAccessException },
-                { typeof(ForbiddenAccessException), HandleForbiddenAccessException },*/
+                { typeof(AutoMapperMappingException), this.HandleMappingException },
+                //{ typeof(ForbiddenAccessException), HandleForbiddenAccessException }
             };
 
         public override void OnException(ExceptionContext context)
@@ -48,6 +49,21 @@ namespace PaymentGateway.Api.Filters
             {
                 StatusCode = StatusCodes.Status402PaymentRequired
             };
+
+            context.ExceptionHandled = true;
+        }
+
+        private void HandleMappingException(ExceptionContext context)
+        {
+            var exception = context.Exception as AutoMapperMappingException;
+
+            var details = new ProblemDetails
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = "Bad request formatting, please check the json payload format."
+            };
+
+            context.Result = new BadRequestObjectResult(details);
 
             context.ExceptionHandled = true;
         }

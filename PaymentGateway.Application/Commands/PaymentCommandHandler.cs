@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentValidation;
+using FluentValidation.Results;
 using PaymentGateway.Application.Common.Exceptions;
 using PaymentGateway.Domain.Entities;
 using PaymentGateway.Application.Common.Interfaces;
@@ -35,7 +36,17 @@ namespace PaymentGateway.Application.Commands
 
         private void Validate(PaymentDemand toValidate)
         {
-            var validationResult = this.paymentRequestValidator.Validate(toValidate);
+            ValidationResult validationResult;
+
+            try
+            {
+                validationResult = this.paymentRequestValidator.Validate(toValidate);
+            }
+            catch
+            {
+                throw new ValidationException(new[] { new ValidationFailure("$", "Bad request formatting, please check the JSON payload format.") });
+            }
+
             if (!validationResult.IsValid)
             {
                 throw new ValidationException(validationResult.Errors);
