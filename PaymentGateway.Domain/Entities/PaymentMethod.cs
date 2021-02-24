@@ -4,7 +4,7 @@ namespace PaymentGateway.Domain.Entities
 
     public class PaymentMethod
     {
-        public PaymentMethodType Type => PaymentMethodType.card;
+        public PaymentMethodType Type { get; } = PaymentMethodType.card;
         public string Brand { get; set; }
         public string Country { get; set; }
         public int ExpiryMonth { get; set; }

@@ -29,7 +29,7 @@ namespace PaymentGateway.Application.Commands
             var paymentConfirmation = await this.acquiringBankGateway.ProcessPaymentAsync(command);
             await this.dbContext.PaymentConfirmations.AddAsync(paymentConfirmation);
             await this.dbContext.SaveChangesAsync(new CancellationToken());
-            ValidateIfPaymentDeclined(paymentConfirmation);
+            ThrowExceptionIfPaymentDeclined(paymentConfirmation);
             return paymentConfirmation;
         }
 
@@ -42,7 +42,7 @@ namespace PaymentGateway.Application.Commands
             }
         }
 
-        private static void ValidateIfPaymentDeclined(PaymentConfirmation payment)
+        private static void ThrowExceptionIfPaymentDeclined(PaymentConfirmation payment)
         {
             if (payment.Status.StartsWith("PAYMENT_DECLINED", StringComparison.InvariantCulture))
             {

@@ -4,7 +4,7 @@ namespace PaymentGateway.Domain.Constants
 {
     public static class PaymentDataConstants
     {
-        public static IEnumerable<string> PaymentCurrencyManaged = new HashSet<string>()
+        public static IEnumerable<string> PaymentCurrencyManaged { get; } = new HashSet<string>()
         {
             "ADP",
             "AED",
@@ -310,7 +310,7 @@ namespace PaymentGateway.Domain.Constants
             "ZWR"
         };
 
-        public static IEnumerable<string> CountryCardProviderManaged = new HashSet<string>()
+        public static IEnumerable<string> CountryCardProviderManaged { get; } = new HashSet<string>()
         {
             "AF",
             "AX",

@@ -16,27 +16,58 @@ namespace PaymentGateway.Application.UnitTests
 {
     public class PaymentCommandHandlerTests
     {
-        public Mock<IValidator<PaymentDemand>> ValidatorMock { get; } =
-            new Mock<IValidator<PaymentDemand>>(MockBehavior.Strict);
+        public Mock<IValidator<PaymentDemand>> ValidatorMock { get; } = new(MockBehavior.Strict);
 
-        public Mock<IAcquiringBankGateway> AcquiringBankGatewayMock { get; } =
-            new Mock<IAcquiringBankGateway>(MockBehavior.Strict);
+        public Mock<IAcquiringBankGateway> AcquiringBankGatewayMock { get; } = new(MockBehavior.Strict);
 
-        public Mock<IApplicationDbContext> dbContext { get; } =
-            new Mock<IApplicationDbContext>(MockBehavior.Strict);
+        public Mock<IApplicationDbContext> DbContext { get; } = new(MockBehavior.Strict);
+
+        public PaymentConfirmation PaymentAcceptedConfirmation { get; } = new() { Id = Guid.NewGuid(), Status = PaymentConfirmationCode.PaymentAccepted };
 
         [Fact]
         public async Task ShouldThrowValidationException()
         {
             //Arrange
             var validationResultMock =
-                new ValidationResult(new List<ValidationFailure>() { new ValidationFailure("test", "test", null) });
+                new ValidationResult(new List<ValidationFailure>() { new("test", "test", null) });
+
             this.ValidatorMock.Setup(x => x.Validate(It.IsAny<PaymentDemand>())).Returns(validationResultMock);
 
-            var paymentCommandHandler = new PaymentCommandHandler(this.ValidatorMock.Object, this.AcquiringBankGatewayMock.Object, this.dbContext.Object);
+            var paymentCommandHandler = new PaymentCommandHandler(this.ValidatorMock.Object, this.AcquiringBankGatewayMock.Object, this.DbContext.Object);
 
             //Act - Assert
             await Assert.ThrowsAsync<Common.Exceptions.ValidationException>(() => paymentCommandHandler.ExecuteAsync(new PaymentDemand()));
+        }
+
+        [Theory]
+        [InlineData(PaymentConfirmationCode.PaymentDeclinedCardInvalidCvv)]
+        [InlineData(PaymentConfirmationCode.PaymentDeclinedCardInvalidExpiryMonth)]
+        [InlineData(PaymentConfirmationCode.PaymentDeclinedCardInvalidExpiryYear)]
+        [InlineData(PaymentConfirmationCode.PaymentDeclinedCardInvalidNumber)]
+        [InlineData(PaymentConfirmationCode.PaymentDeclinedCardNotSupported)]
+        [InlineData(PaymentConfirmationCode.PaymentDeclinedCardStolen)]
+        [InlineData(PaymentConfirmationCode.PaymentDeclinedInsufficientFunds)]
+        public async Task ShouldThrowPaymentDeclinedException(string paymentDeclinedCode)
+        {
+            //Arrange
+            this.ValidatorMock.Setup(x => x.Validate(It.IsAny<PaymentDemand>())).Returns(new ValidationResult());
+
+            var declinedPaymentConfirmation = this.PaymentAcceptedConfirmation;
+            declinedPaymentConfirmation.Status = paymentDeclinedCode;
+
+            this.AcquiringBankGatewayMock.Setup(x => x.ProcessPaymentAsync(It.IsAny<PaymentDemand>()))
+                .ReturnsAsync(this.PaymentAcceptedConfirmation);
+
+            this.DbContext.Setup(dbc => dbc.PaymentConfirmations.AddAsync(It.IsAny<PaymentConfirmation>(), new CancellationToken()))
+                .ReturnsAsync(It.IsAny<EntityEntry<PaymentConfirmation>>());
+
+            this.DbContext.Setup(dbc => dbc.SaveChangesAsync(new CancellationToken()))
+                .ReturnsAsync(It.IsAny<int>());
+
+            var paymentCommandHandler = new PaymentCommandHandler(this.ValidatorMock.Object, this.AcquiringBankGatewayMock.Object, this.DbContext.Object);
+
+            //Act - Assert
+            await Assert.ThrowsAsync<Common.Exceptions.PaymentDeclineException>(() => paymentCommandHandler.ExecuteAsync(new PaymentDemand()));
         }
 
         [Fact]
@@ -45,17 +76,16 @@ namespace PaymentGateway.Application.UnitTests
             //Arrange
             this.ValidatorMock.Setup(x => x.Validate(It.IsAny<PaymentDemand>())).Returns(new ValidationResult());
 
-            var paymentConfirmation = new PaymentConfirmation() { Id = Guid.NewGuid(), Status = "Confirmed" };
             this.AcquiringBankGatewayMock.Setup(x => x.ProcessPaymentAsync(It.IsAny<PaymentDemand>()))
-                .ReturnsAsync(paymentConfirmation);
+                .ReturnsAsync(this.PaymentAcceptedConfirmation);
 
-            this.dbContext.Setup(dbc => dbc.PaymentConfirmations.AddAsync(It.IsAny<PaymentConfirmation>(), new CancellationToken()))
+            this.DbContext.Setup(dbc => dbc.PaymentConfirmations.AddAsync(It.IsAny<PaymentConfirmation>(), new CancellationToken()))
                 .ReturnsAsync(It.IsAny<EntityEntry<PaymentConfirmation>>());
 
-            this.dbContext.Setup(dbc => dbc.SaveChangesAsync(new CancellationToken()))
+            this.DbContext.Setup(dbc => dbc.SaveChangesAsync(new CancellationToken()))
                 .ReturnsAsync(It.IsAny<int>());
 
-            var paymentCommandHandler = new PaymentCommandHandler(this.ValidatorMock.Object, this.AcquiringBankGatewayMock.Object, this.dbContext.Object);
+            var paymentCommandHandler = new PaymentCommandHandler(this.ValidatorMock.Object, this.AcquiringBankGatewayMock.Object, this.DbContext.Object);
 
             //Act
             var result = await paymentCommandHandler.ExecuteAsync(new PaymentDemand());
@@ -71,22 +101,19 @@ namespace PaymentGateway.Application.UnitTests
             //Arrange
             this.ValidatorMock.Setup(x => x.Validate(It.IsAny<PaymentDemand>())).Returns(new ValidationResult());
 
-            var paymentDemand = new PaymentDemand();
-
-            var paymentConfirmation = new PaymentConfirmation() { Id = Guid.NewGuid(), Status = "Confirmed" };
             this.AcquiringBankGatewayMock.Setup(x => x.ProcessPaymentAsync(It.IsAny<PaymentDemand>()))
-                .ReturnsAsync(paymentConfirmation);
+                .ReturnsAsync(this.PaymentAcceptedConfirmation);
 
-            this.dbContext.Setup(dbc => dbc.PaymentConfirmations.AddAsync(It.IsAny<PaymentConfirmation>(), new CancellationToken()))
+            this.DbContext.Setup(dbc => dbc.PaymentConfirmations.AddAsync(It.IsAny<PaymentConfirmation>(), new CancellationToken()))
                 .ReturnsAsync(It.IsAny<EntityEntry<PaymentConfirmation>>());
 
-            this.dbContext.Setup(dbc => dbc.SaveChangesAsync(new CancellationToken()))
+            this.DbContext.Setup(dbc => dbc.SaveChangesAsync(new CancellationToken()))
                 .ReturnsAsync(It.IsAny<int>());
 
-            var paymentCommandHandler = new PaymentCommandHandler(this.ValidatorMock.Object, this.AcquiringBankGatewayMock.Object, this.dbContext.Object);
+            var paymentCommandHandler = new PaymentCommandHandler(this.ValidatorMock.Object, this.AcquiringBankGatewayMock.Object, this.DbContext.Object);
 
             //Act
-            var result = await paymentCommandHandler.ExecuteAsync(paymentDemand);
+            var result = await paymentCommandHandler.ExecuteAsync(new PaymentDemand());
 
             //Assert
             this.ValidatorMock.Verify(x => x.Validate(It.IsAny<PaymentDemand>()), Times.Once);
@@ -96,23 +123,20 @@ namespace PaymentGateway.Application.UnitTests
         public async Task ShouldCallProcessPaymentAsyncFromAcquiringBankGateway()
         {
             //Arrange
-            var validationResultMock =
-                new ValidationResult(new List<ValidationFailure>() { new ValidationFailure("test", "test", null) });
             this.ValidatorMock.Setup(x => x.Validate(It.IsAny<PaymentDemand>())).Returns(new ValidationResult());
+
+            this.AcquiringBankGatewayMock.Setup(x => x.ProcessPaymentAsync(It.IsAny<PaymentDemand>()))
+                .ReturnsAsync(this.PaymentAcceptedConfirmation);
+
+            this.DbContext.Setup(dbc => dbc.PaymentConfirmations.AddAsync(It.IsAny<PaymentConfirmation>(), new CancellationToken()))
+                .ReturnsAsync(It.IsAny<EntityEntry<PaymentConfirmation>>());
+
+            this.DbContext.Setup(dbc => dbc.SaveChangesAsync(new CancellationToken()))
+                .ReturnsAsync(It.IsAny<int>());
 
             var paymentDemand = new PaymentDemand();
 
-            var paymentConfirmation = new PaymentConfirmation() { Id = Guid.NewGuid(), Status = "Confirmed" };
-            this.AcquiringBankGatewayMock.Setup(x => x.ProcessPaymentAsync(It.IsAny<PaymentDemand>()))
-                .ReturnsAsync(paymentConfirmation);
-
-            this.dbContext.Setup(dbc => dbc.PaymentConfirmations.AddAsync(It.IsAny<PaymentConfirmation>(), new CancellationToken()))
-                .ReturnsAsync(It.IsAny<EntityEntry<PaymentConfirmation>>());
-
-            this.dbContext.Setup(dbc => dbc.SaveChangesAsync(new CancellationToken()))
-                .ReturnsAsync(It.IsAny<int>());
-
-            var paymentCommandHandler = new PaymentCommandHandler(this.ValidatorMock.Object, this.AcquiringBankGatewayMock.Object, this.dbContext.Object);
+            var paymentCommandHandler = new PaymentCommandHandler(this.ValidatorMock.Object, this.AcquiringBankGatewayMock.Object, this.DbContext.Object);
 
             //Act
             var result = await paymentCommandHandler.ExecuteAsync(paymentDemand);

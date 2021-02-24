@@ -27,12 +27,23 @@ namespace PaymentGateway.Application.Services
                 return PaymentConfirmation.FromPaymentDemand(paymentDemand, PaymentConfirmationCode.PaymentDeclinedCardNotSupported);
             }
 
+            if (paymentDemand.Amount > 1000000000)
+            {
+                return PaymentConfirmation.FromPaymentDemand(paymentDemand, PaymentConfirmationCode.PaymentDeclinedInsufficientFunds);
+            }
+
+            if (IsStolenCard(paymentDemand.PaymentMethod))
+            {
+                return PaymentConfirmation.FromPaymentDemand(paymentDemand, PaymentConfirmationCode.PaymentDeclinedCardStolen);
+            }
+
             if (IsMasterCard(paymentDemand.PaymentMethod))
             {
                 return PaymentConfirmation.FromPaymentDemand(paymentDemand,
                     GetMastercardCheckConfirmation(paymentDemand.PaymentMethod));
             }
-            else if (IsVisa(paymentDemand.PaymentMethod))
+
+            if (IsVisa(paymentDemand.PaymentMethod))
             {
                 return PaymentConfirmation.FromPaymentDemand(paymentDemand,
                     GetVisaCheckConfirmation(paymentDemand.PaymentMethod));
@@ -41,26 +52,25 @@ namespace PaymentGateway.Application.Services
             return PaymentConfirmation.FromPaymentDemand(paymentDemand, PaymentConfirmationCode.PaymentAccepted);
         }
 
-        private static bool IsMasterCard(PaymentMethod card) => card.Brand.ToUpperInvariant().Trim() is "MASTERCARD";
-        private static bool IsVisa(PaymentMethod card) => card.Brand.ToUpperInvariant().Trim() is "VISA";
+        private static bool IsMasterCard(PaymentMethod card) => RemoveWhiteSpaces(card.Brand.ToUpperInvariant()) is "MASTERCARD";
+
+        private static bool IsVisa(PaymentMethod card) => RemoveWhiteSpaces(card.Brand.ToUpperInvariant()) is "VISA";
 
         private static string GetMastercardCheckConfirmation(PaymentMethod cardDetail)
         {
             if (RemoveWhiteSpaces(cardDetail.Number) is not "5555555555554444")
             {
                 return PaymentConfirmationCode.PaymentDeclinedCardInvalidNumber;
-            }else if (cardDetail.ExpiryMonth != 3)
+            }
+            if (cardDetail.ExpiryMonth != 3)
             {
                 return PaymentConfirmationCode.PaymentDeclinedCardInvalidExpiryMonth;
-            }else if(cardDetail.ExpiryYear != 2030)
+            }
+            if (cardDetail.ExpiryYear != 2030)
             {
                 return PaymentConfirmationCode.PaymentDeclinedCardInvalidExpiryYear;
-            }else if (cardDetail.Cvv != 737)
-            {
-                return PaymentConfirmationCode.PaymentDeclinedCardInvalidCvv;
             }
-
-            return PaymentConfirmationCode.PaymentAccepted;
+            return cardDetail.Cvv != 737 ? PaymentConfirmationCode.PaymentDeclinedCardInvalidCvv : PaymentConfirmationCode.PaymentAccepted;
         }
 
         private static string GetVisaCheckConfirmation(PaymentMethod cardDetail)
@@ -69,20 +79,29 @@ namespace PaymentGateway.Application.Services
             {
                 return PaymentConfirmationCode.PaymentDeclinedCardInvalidNumber;
             }
-            else if (cardDetail.ExpiryMonth != 3)
+            if (cardDetail.ExpiryMonth != 3)
             {
                 return PaymentConfirmationCode.PaymentDeclinedCardInvalidExpiryMonth;
             }
-            else if (cardDetail.ExpiryYear != 2030)
+            if (cardDetail.ExpiryYear != 2030)
             {
                 return PaymentConfirmationCode.PaymentDeclinedCardInvalidExpiryYear;
             }
-            else if (cardDetail.Cvv != 737)
+            return cardDetail.Cvv != 737 ? PaymentConfirmationCode.PaymentDeclinedCardInvalidCvv : PaymentConfirmationCode.PaymentAccepted;
+        }
+
+        private static bool IsStolenCard(PaymentMethod cardDetail)
+        {
+            if (RemoveWhiteSpaces(cardDetail.Brand.ToUpperInvariant()) is "VISA"
+                && RemoveWhiteSpaces(cardDetail.Number) is "4000020000000000"
+                && cardDetail.ExpiryYear == 2030
+                && cardDetail.ExpiryMonth == 03
+                && cardDetail.Cvv == 737)
             {
-                return PaymentConfirmationCode.PaymentDeclinedCardInvalidCvv;
+                return true;
             }
 
-            return PaymentConfirmationCode.PaymentAccepted;
+            return false;
         }
 
         private static string RemoveWhiteSpaces(string str) => Regex.Replace(str, @"\s+", "");
