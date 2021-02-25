@@ -275,7 +275,7 @@ Route to fetch payment confirmation processed
 ```
 * **Tests Data and Tests cases**
 * As the Acquiring bank is mocked, I have implemented specific behavior on the mock
-* Valid Card (will return PAYMENT_ACCEPTED status if amout and ccy are correct:
+* Valid Card (will return PAYMENT_ACCEPTED status if amout and ccy are correct <span style="color:green"> *green* Only the 2 test cards below are valid </span> :
 ```json
 {
   "amount": 500,
@@ -306,7 +306,7 @@ or
   }
 }
 ```
-* Stolen Card data (will return PAYMENT_DECLINED_CARD_STOLEN status if amout and ccy are correct:
+* Stolen Card data (will return PAYMENT_DECLINED_CARD_STOLEN status if amout and ccy are correct - Only this card tests will return this status:
 ```json
 {
   "amount": 500,
