@@ -17,6 +17,7 @@ namespace PaymentGateway.Api.IntegrationTests
     {
         private readonly TestServer server;
         private readonly HttpClient client;
+        private readonly IConfiguration configuration;
 
         public string ValidRequest { get; } =
             $"{{\r\n  \"amount\": 500,\r\n  \"currency\": \"usd\",\r\n  \"paymentMethod\": {{\r\n    \"paymentType\": \"card\",\r\n    \"cardBrand\": \"visa\",\r\n    \"cardCountry\": \"fr\",\r\n    \"cardExpiryMonth\": \"03\",\r\n    \"cardExpiryYear\": \"2030\",\r\n    \"cardNumber\": \"4977 9494 9494 9497\",\r\n    \"cardCvv\": \"737\"\r\n  }}\r\n}}";
@@ -44,18 +45,31 @@ namespace PaymentGateway.Api.IntegrationTests
                 .AddJsonFile("appsettings.json", true, true)
                 .AddEnvironmentVariables();
 
-            var configuration = builder.Build();
+            this.configuration = builder.Build();
 
             this.server = new TestServer(new WebHostBuilder()
-                .UseStartup<Startup>().UseConfiguration(configuration));
+                .UseStartup<Startup>().UseConfiguration(this.configuration));
             this.client = this.server.CreateClient();
+
+            this.client.DefaultRequestHeaders.Add("ApiKey", this.configuration.GetValue<string>("ApiKey"));
+        }
+
+        [Fact]
+        public async Task ShouldReturnStatusCodeUnauthorizedIfApiKeyIsMissing()
+        {
+            //Act
+            using var httpClient = this.server.CreateClient();
+            var response = await httpClient.PostAsync(this.PaymentDemandUri, GetPayload(this.ValidRequest));
+
+            //Assert
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         }
 
         [Fact]
         public async Task ShouldReturnStatusCodeOkWithValidRequest()
         {
             //Act
-            var response = await this.client.PostAsync(this.PaymentDemandUri, new StringContent(this.ValidRequest, Encoding.UTF8, "application/json"));
+            var response = await this.client.PostAsync(this.PaymentDemandUri, GetPayload(this.ValidRequest));
 
             var paymentConfirmation =
                 JsonConvert.DeserializeObject<PaymentConfirmationDto>(await response.Content.ReadAsStringAsync());
@@ -70,7 +84,7 @@ namespace PaymentGateway.Api.IntegrationTests
         public async Task ShouldHaveInsertedInDbThePaymentConfirmationAndShouldBeRequestableById()
         {
             //Arrange
-            var responseFromPost = await this.client.PostAsync(this.PaymentDemandUri, new StringContent(this.ValidRequest, Encoding.UTF8, "application/json"));
+            var responseFromPost = await this.client.PostAsync(this.PaymentDemandUri, GetPayload(this.ValidRequest));
 
             //Act
             var paymentConfirmation =
@@ -95,25 +109,20 @@ namespace PaymentGateway.Api.IntegrationTests
         }
 
         [Fact]
-        public async Task ShouldReturnHttpCode402WhenCardDetailsAreWrong()
+        public async Task ShouldReturnHttpCode404WhenPaymentDetailIsNotFound()
         {
             //Act
-            var response = await this.client.PostAsync(this.PaymentDemandUri, new StringContent(this.ValidRequest, Encoding.UTF8, "application/json"));
-
-            var paymentConfirmation =
-                JsonConvert.DeserializeObject<PaymentConfirmationDto>(await response.Content.ReadAsStringAsync());
+            var responseFromGet = await this.client.GetAsync(this.PaymentDetailUri + "Wrong id");
 
             //Assert
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.NotNull(paymentConfirmation);
-            Assert.IsType<PaymentConfirmationDto>(paymentConfirmation);
+            Assert.Equal(HttpStatusCode.NotFound, responseFromGet.StatusCode);
         }
 
         [Fact]
         public async Task ShouldReturnHttpCode402WhenCardIsStolen()
         {
             //Act
-            var response = await this.client.PostAsync(this.PaymentDemandUri, new StringContent(this.InvalidRequestWithStolenCard, Encoding.UTF8, "application/json"));
+            var response = await this.client.PostAsync(this.PaymentDemandUri, GetPayload(this.InvalidRequestWithStolenCard));
 
             var paymentConfirmation =
                 JsonConvert.DeserializeObject<PaymentConfirmationDto>(await response.Content.ReadAsStringAsync());
@@ -128,7 +137,7 @@ namespace PaymentGateway.Api.IntegrationTests
         public async Task ShouldReturnHttpCode400WhenFormatIsWrong()
         {
             //Act
-            var response = await this.client.PostAsync(this.PaymentDemandUri, new StringContent(this.InvalidRequestWithFormatException, Encoding.UTF8, "application/json"));
+            var response = await this.client.PostAsync(this.PaymentDemandUri, GetPayload(this.InvalidRequestWithFormatException));
 
             //Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
@@ -138,7 +147,7 @@ namespace PaymentGateway.Api.IntegrationTests
         public async Task ShouldReturnHttpCode400WhenFormatIsInvalid()
         {
             //Act
-            var response = await this.client.PostAsync(this.PaymentDemandUri, new StringContent(this.InvalidRequest, Encoding.UTF8, "application/json"));
+            var response = await this.client.PostAsync(this.PaymentDemandUri, GetPayload(this.InvalidRequest));
 
             //Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
@@ -148,11 +157,13 @@ namespace PaymentGateway.Api.IntegrationTests
         public async Task ShouldReturnHttpCode400WhenValidationFail()
         {
             //Act
-            var response = await this.client.PostAsync(this.PaymentDemandUri, new StringContent(this.InvalidRequestWithValidationException, Encoding.UTF8, "application/json"));
+            var response = await this.client.PostAsync(this.PaymentDemandUri, GetPayload(this.InvalidRequestWithValidationException));
 
             //Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
+
+        private static StringContent GetPayload(string request) => new(request, Encoding.UTF8, "application/json");
 
         public void Dispose()
         {

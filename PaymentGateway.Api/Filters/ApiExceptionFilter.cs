@@ -8,6 +8,9 @@ using PaymentGateway.Application.Common.Exceptions;
 
 namespace PaymentGateway.Api.Filters
 {
+    /// <summary>
+    /// Filter to manage Exceptions centrally
+    /// </summary>
     public class ApiExceptionFilter : ExceptionFilterAttribute
     {
         private readonly IDictionary<Type, Action<ExceptionContext>> exceptionHandlers;
@@ -19,7 +22,7 @@ namespace PaymentGateway.Api.Filters
                 { typeof(ValidationException), this.HandleValidationException },
                 { typeof(PaymentDeclineException), this.HandlePaymentDeclinedException },
                 { typeof(AutoMapperMappingException), this.HandleMappingException },
-                //{ typeof(ForbiddenAccessException), HandleForbiddenAccessException }
+                { typeof(NotFoundException), this.HandleNotFoundException },
             };
 
         public override void OnException(ExceptionContext context)
@@ -27,6 +30,22 @@ namespace PaymentGateway.Api.Filters
             this.HandleException(context);
 
             base.OnException(context);
+        }
+
+        private void HandleNotFoundException(ExceptionContext context)
+        {
+            var exception = context.Exception as NotFoundException;
+
+            var details = new ProblemDetails()
+            {
+                Type = "https://tools.ietf.org/html/rfc7231#section-6.5.4",
+                Title = "The specified resource was not found.",
+                Detail = exception.Message
+            };
+
+            context.Result = new NotFoundObjectResult(details);
+
+            context.ExceptionHandled = true;
         }
 
         private void HandleException(ExceptionContext context)

@@ -13,6 +13,7 @@ namespace PaymentGateway.Api.Controllers
     [ApiController]
     [Route("payments")]
     [ApiExceptionFilter]
+    [ApiAuthentication]
     public class PaymentController : ControllerBase
     {
         private readonly ILogger<PaymentController> logger;
