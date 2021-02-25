@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using PaymentGateway.Infrastructure.Database;
 using Microsoft.Extensions.Configuration;
 using PaymentGateway.Application.Common.Interfaces;
+using PaymentGateway.Infrastructure.Services;
 
 namespace PaymentGateway.Infrastructure
 {
@@ -22,6 +23,8 @@ namespace PaymentGateway.Infrastructure
                         configuration.GetConnectionString("DefaultConnection"),
                         b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
             }
+
+            services.AddTransient<IDateService, DateService>();
             services.AddTransient<IApplicationDbContext>(provider => provider.GetService<ApplicationDbContext>());
 
             return services;

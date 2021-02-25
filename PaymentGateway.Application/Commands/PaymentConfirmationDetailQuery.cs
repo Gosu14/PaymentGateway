@@ -6,11 +6,14 @@ using PaymentGateway.Domain.Entities;
 
 namespace PaymentGateway.Application.Commands
 {
+    /// <summary>
+    /// Command Query to manage the retrieval of a PaymentConfirmation
+    /// </summary>
     public class PaymentConfirmationDetailQuery : ICommandHandler<string, PaymentConfirmation>
     {
         private readonly IApplicationDbContext dbContext;
 
-        public PaymentConfirmationDetailQuery(IApplicationDbContext dbContext) => this.dbContext = dbContext;
+        public PaymentConfirmationDetailQuery(IApplicationDbContext dbContext) => this.dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
         public async Task<PaymentConfirmation> ExecuteAsync(string command)
         {

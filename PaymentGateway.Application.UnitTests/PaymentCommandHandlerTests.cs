@@ -9,6 +9,7 @@ using PaymentGateway.Domain.Interfaces;
 using System;
 using System.Threading;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.Extensions.Logging;
 using PaymentGateway.Application.Common.Interfaces;
 using PaymentGateway.Domain.Entities;
 
@@ -16,11 +17,13 @@ namespace PaymentGateway.Application.UnitTests
 {
     public class PaymentCommandHandlerTests
     {
-        public Mock<IValidator<PaymentDemand>> ValidatorMock { get; } = new(MockBehavior.Strict);
+        public Mock<IValidator<PaymentDemand>> ValidatorMock { get; } = new();
 
         public Mock<IAcquiringBankGateway> AcquiringBankGatewayMock { get; } = new(MockBehavior.Strict);
 
         public Mock<IApplicationDbContext> DbContext { get; } = new(MockBehavior.Strict);
+
+        public Mock<ILogger<PaymentCommandHandler>> Logger { get; } = new();
 
         public PaymentConfirmation PaymentAcceptedConfirmation { get; } = new() { Id = Guid.NewGuid(), Status = PaymentConfirmationCode.PaymentAccepted };
 
@@ -33,7 +36,7 @@ namespace PaymentGateway.Application.UnitTests
 
             this.ValidatorMock.Setup(x => x.Validate(It.IsAny<PaymentDemand>())).Returns(validationResultMock);
 
-            var paymentCommandHandler = new PaymentCommandHandler(this.ValidatorMock.Object, this.AcquiringBankGatewayMock.Object, this.DbContext.Object);
+            var paymentCommandHandler = new PaymentCommandHandler(this.ValidatorMock.Object, this.AcquiringBankGatewayMock.Object, this.DbContext.Object, this.Logger.Object);
 
             //Act - Assert
             await Assert.ThrowsAsync<Common.Exceptions.ValidationException>(() => paymentCommandHandler.ExecuteAsync(new PaymentDemand()));
@@ -64,7 +67,7 @@ namespace PaymentGateway.Application.UnitTests
             this.DbContext.Setup(dbc => dbc.SaveChangesAsync(new CancellationToken()))
                 .ReturnsAsync(It.IsAny<int>());
 
-            var paymentCommandHandler = new PaymentCommandHandler(this.ValidatorMock.Object, this.AcquiringBankGatewayMock.Object, this.DbContext.Object);
+            var paymentCommandHandler = new PaymentCommandHandler(this.ValidatorMock.Object, this.AcquiringBankGatewayMock.Object, this.DbContext.Object, this.Logger.Object);
 
             //Act - Assert
             await Assert.ThrowsAsync<Common.Exceptions.PaymentDeclineException>(() => paymentCommandHandler.ExecuteAsync(new PaymentDemand()));
@@ -85,7 +88,7 @@ namespace PaymentGateway.Application.UnitTests
             this.DbContext.Setup(dbc => dbc.SaveChangesAsync(new CancellationToken()))
                 .ReturnsAsync(It.IsAny<int>());
 
-            var paymentCommandHandler = new PaymentCommandHandler(this.ValidatorMock.Object, this.AcquiringBankGatewayMock.Object, this.DbContext.Object);
+            var paymentCommandHandler = new PaymentCommandHandler(this.ValidatorMock.Object, this.AcquiringBankGatewayMock.Object, this.DbContext.Object, this.Logger.Object);
 
             //Act
             var result = await paymentCommandHandler.ExecuteAsync(new PaymentDemand());
@@ -110,7 +113,7 @@ namespace PaymentGateway.Application.UnitTests
             this.DbContext.Setup(dbc => dbc.SaveChangesAsync(new CancellationToken()))
                 .ReturnsAsync(It.IsAny<int>());
 
-            var paymentCommandHandler = new PaymentCommandHandler(this.ValidatorMock.Object, this.AcquiringBankGatewayMock.Object, this.DbContext.Object);
+            var paymentCommandHandler = new PaymentCommandHandler(this.ValidatorMock.Object, this.AcquiringBankGatewayMock.Object, this.DbContext.Object, this.Logger.Object);
 
             //Act
             var result = await paymentCommandHandler.ExecuteAsync(new PaymentDemand());
@@ -136,7 +139,7 @@ namespace PaymentGateway.Application.UnitTests
 
             var paymentDemand = new PaymentDemand();
 
-            var paymentCommandHandler = new PaymentCommandHandler(this.ValidatorMock.Object, this.AcquiringBankGatewayMock.Object, this.DbContext.Object);
+            var paymentCommandHandler = new PaymentCommandHandler(this.ValidatorMock.Object, this.AcquiringBankGatewayMock.Object, this.DbContext.Object, this.Logger.Object);
 
             //Act
             var result = await paymentCommandHandler.ExecuteAsync(paymentDemand);

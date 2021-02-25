@@ -4,18 +4,22 @@ using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Logging;
 using PaymentGateway.Application.Common.Exceptions;
 
 namespace PaymentGateway.Api.Filters
 {
     /// <summary>
-    /// Filter to manage Exceptions centrally
+    /// Filter to manage application exceptions centrally.
     /// </summary>
-    public class ApiExceptionFilter : ExceptionFilterAttribute
+    public class ApiExceptionFilter : IExceptionFilter
     {
         private readonly IDictionary<Type, Action<ExceptionContext>> exceptionHandlers;
 
-        public ApiExceptionFilter() =>
+        private readonly ILogger<ApiExceptionFilter> logger;
+
+        public ApiExceptionFilter(ILogger<ApiExceptionFilter> logger)
+        {
             // Register known exception types and handlers.
             this.exceptionHandlers = new Dictionary<Type, Action<ExceptionContext>>
             {
@@ -24,29 +28,10 @@ namespace PaymentGateway.Api.Filters
                 { typeof(AutoMapperMappingException), this.HandleMappingException },
                 { typeof(NotFoundException), this.HandleNotFoundException },
             };
-
-        public override void OnException(ExceptionContext context)
-        {
-            this.HandleException(context);
-
-            base.OnException(context);
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        private void HandleNotFoundException(ExceptionContext context)
-        {
-            var exception = context.Exception as NotFoundException;
-
-            var details = new ProblemDetails()
-            {
-                Type = "https://tools.ietf.org/html/rfc7231#section-6.5.4",
-                Title = "The specified resource was not found.",
-                Detail = exception.Message
-            };
-
-            context.Result = new NotFoundObjectResult(details);
-
-            context.ExceptionHandled = true;
-        }
+        public void OnException(ExceptionContext context) => this.HandleException(context);
 
         private void HandleException(ExceptionContext context)
         {
@@ -57,7 +42,26 @@ namespace PaymentGateway.Api.Filters
                 return;
             }
 
-            HandleUnknownException(context);
+            this.HandleUnknownException(context);
+        }
+
+        private void HandleNotFoundException(ExceptionContext context)
+        {
+            var exception = context.Exception as NotFoundException;
+
+            var details = new ProblemDetails()
+            {
+                Type = "https://tools.ietf.org/html/rfc7231#section-6.5.4",
+                Title = "The specified resource was not found.",
+                Detail = exception?.Message
+            };
+
+            context.Result = new NotFoundObjectResult(details);
+
+            context.ExceptionHandled = true;
+
+            //this.logger.LogWarning("Not Found Exception : {Id} has been catch.", details.Detail);
+            this.logger.LogWarning(exception, "A NotFoundException has been catch.");
         }
 
         private void HandlePaymentDeclinedException(ExceptionContext context)
@@ -70,6 +74,8 @@ namespace PaymentGateway.Api.Filters
             };
 
             context.ExceptionHandled = true;
+
+            this.logger.LogWarning(exception, "A PaymentDeclineException has been catch.");
         }
 
         private void HandleMappingException(ExceptionContext context)
@@ -85,13 +91,15 @@ namespace PaymentGateway.Api.Filters
             context.Result = new BadRequestObjectResult(details);
 
             context.ExceptionHandled = true;
+
+            this.logger.LogWarning(exception, "An AutoMapperMappingException has been catch.");
         }
 
         private void HandleValidationException(ExceptionContext context)
         {
             var exception = context.Exception as ValidationException;
 
-            var details = new ValidationProblemDetails(exception.Errors)
+            var details = new ValidationProblemDetails(exception?.Errors)
             {
                 Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1"
             };
@@ -99,10 +107,14 @@ namespace PaymentGateway.Api.Filters
             context.Result = new BadRequestObjectResult(details);
 
             context.ExceptionHandled = true;
+
+            this.logger.LogWarning(exception, "An ValidationException has been catch.");
         }
 
-        private static void HandleUnknownException(ExceptionContext context)
+        private void HandleUnknownException(ExceptionContext context)
         {
+            var exception = context.Exception;
+
             var details = new ProblemDetails
             {
                 Status = StatusCodes.Status500InternalServerError,
@@ -116,6 +128,8 @@ namespace PaymentGateway.Api.Filters
             };
 
             context.ExceptionHandled = true;
+
+            this.logger.LogCritical(exception, "An unmanaged exception has been catch.");
         }
     }
 }

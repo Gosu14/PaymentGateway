@@ -1,9 +1,8 @@
 using System;
+using PaymentGateway.Application.Common.Interfaces;
 
-namespace PaymentGateway.Application.Services
+namespace PaymentGateway.Infrastructure.Services
 {
-    using Common.Interfaces;
-
     public class DateService : IDateService
     {
         public DateTime CurrentDateTime => DateTime.Now;

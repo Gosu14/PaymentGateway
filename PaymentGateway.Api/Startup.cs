@@ -7,6 +7,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using PaymentGateway.Infrastructure;
 using System.Reflection;
+using PaymentGateway.Api.Filters;
+using PaymentGateway.Api.Middleware;
 using PaymentGateway.Application;
 
 namespace PaymentGateway.Api
@@ -23,7 +25,8 @@ namespace PaymentGateway.Api
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
             services.AddApplication();
             services.AddInfrastructure(this.Configuration);
-            services.AddControllers();
+            //Adding Exception Filter
+            services.AddControllers(options => options.Filters.Add<ApiExceptionFilter>());
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "PaymentGateway.Api", Version = "v1" });
@@ -34,6 +37,7 @@ namespace PaymentGateway.Api
                         Name = "ApiKey",
                         Type = SecuritySchemeType.ApiKey
                     });
+                //Adding the Swagger ApiToken Management
                 c.AddSecurityRequirement(new OpenApiSecurityRequirement
                 {
                     {
@@ -61,6 +65,9 @@ namespace PaymentGateway.Api
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "PaymentGateway.Api v1");
                 });
             }
+
+            //Adding Middleware
+            app.UseMiddleware<RequestLoggingMiddleware>();
 
             app.UseHttpsRedirection();
 

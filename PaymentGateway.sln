@@ -30,7 +30,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentat
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PaymentGateway.Application.UnitTests", "PaymentGateway.Application.UnitTests\PaymentGateway.Application.UnitTests.csproj", "{4C8CB04F-5EC6-454A-9953-871618AEF0F2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaymentGateway.Api.IntegrationTests", "PaymentGateway.Api.IntegrationTests\PaymentGateway.Api.IntegrationTests.csproj", "{EC743DDD-5A2E-461A-AF3A-13670DDC15C3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PaymentGateway.Api.IntegrationTests", "PaymentGateway.Api.IntegrationTests\PaymentGateway.Api.IntegrationTests.csproj", "{EC743DDD-5A2E-461A-AF3A-13670DDC15C3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{4A320C1A-ECA4-486F-94C6-CB6E50A17C27}"
+	ProjectSection(SolutionItems) = preProject
+		.github\release-drafter.yml = .github\release-drafter.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{9CA2254A-8D29-47FE-BF91-21D04FF62C52}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\ci-pipeline-build.yml = .github\workflows\ci-pipeline-build.yml
+		.github\workflows\codeql-analysis.yml = .github\workflows\codeql-analysis.yml
+		.github\workflows\release-drafter.yml = .github\workflows\release-drafter.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -73,6 +85,8 @@ Global
 		{F91075DA-321E-45C5-B335-A7435A7157ED} = {5FD793D1-357A-428B-AF25-B6E68942982E}
 		{4C8CB04F-5EC6-454A-9953-871618AEF0F2} = {BC4EE07B-8546-4EED-8EC5-D356F83F4223}
 		{EC743DDD-5A2E-461A-AF3A-13670DDC15C3} = {BC4EE07B-8546-4EED-8EC5-D356F83F4223}
+		{4A320C1A-ECA4-486F-94C6-CB6E50A17C27} = {F565A5DE-1BE3-4444-AA63-EDED7B8B11F1}
+		{9CA2254A-8D29-47FE-BF91-21D04FF62C52} = {4A320C1A-ECA4-486F-94C6-CB6E50A17C27}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {AC186930-57A9-4C84-BE8F-5E5760947251}

@@ -13,7 +13,8 @@ namespace PaymentGateway.Application.Common.Exceptions
             : base("Validation exceptions have happened.") => this.Errors = new Dictionary<string, string[]>();
 
         public ValidationException(IEnumerable<ValidationFailure> failures)
-            : this() => this.Errors = failures
+            : this() =>
+            this.Errors = failures?
                 .GroupBy(e => e.PropertyName, e => e.ErrorMessage)
                 .ToDictionary(failureGroup => failureGroup.Key, failureGroup => failureGroup.ToArray());
     }

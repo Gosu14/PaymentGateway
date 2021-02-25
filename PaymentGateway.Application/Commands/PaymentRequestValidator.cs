@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using FluentValidation;
 using PaymentGateway.Domain.Entities;
@@ -10,6 +11,11 @@ namespace PaymentGateway.Application.Commands
     {
         public PaymentRequestValidator(IDateService dateService)
         {
+            if (dateService == null)
+            {
+                throw new ArgumentNullException(nameof(dateService));
+            }
+
             this.RuleFor(v => v.Amount)
                 .ExclusiveBetween(0, 1000000000).WithMessage("Amount must be between 0 and 1000000000");
 

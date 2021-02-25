@@ -13,7 +13,6 @@ namespace PaymentGateway.Application
     {
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
-            services.AddTransient<IDateService, DateService>();
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
             services.AddTransient<IAcquiringBankGateway, AcquiringBankGateway>();
             services.AddTransient<ICommandHandler<PaymentDemand, PaymentConfirmation>, PaymentCommandHandler>();
