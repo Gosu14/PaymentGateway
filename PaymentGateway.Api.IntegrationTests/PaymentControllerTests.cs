@@ -105,7 +105,6 @@ namespace PaymentGateway.Api.IntegrationTests
             Assert.Equal(paymentConfirmation.Currency, paymentConfirmationFromGet.Currency);
             Assert.Equal(paymentConfirmation.Status, paymentConfirmationFromGet.Status);
             Assert.Equal(paymentConfirmation.Last4, paymentConfirmationFromGet.Last4);
-            Assert.Equal(paymentConfirmation.Type, paymentConfirmationFromGet.Type);
         }
 
         [Fact]

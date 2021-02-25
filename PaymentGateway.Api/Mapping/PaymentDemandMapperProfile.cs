@@ -12,7 +12,6 @@ namespace PaymentGateway.Api.Mapping
             this.CreateMap<PaymentDemandDto, PaymentDemand>().ReverseMap();
 
             this.CreateMap<PaymentMethodDto, PaymentMethod>()
-                .ForMember(dest => dest.Type, opt => opt.Ignore())
                 .ForMember(dest => dest.Brand, opt => opt.MapFrom(src => RemoveWhiteSpaces(src.CardBrand)))
                 .ForMember(dest => dest.Country, opt => opt.MapFrom(src => RemoveWhiteSpaces(src.CardCountry)))
                 .ForMember(dest => dest.Number, opt => opt.MapFrom(src => RemoveWhiteSpaces(src.CardNumber)))

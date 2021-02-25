@@ -17,7 +17,7 @@ namespace PaymentGateway.Application.Commands
             }
 
             this.RuleFor(v => v.Amount)
-                .ExclusiveBetween(0, 1000000000).WithMessage("Amount must be between 0 and 1000000000");
+                .ExclusiveBetween(0, 1000000).WithMessage("Amount must be between 0 and 1000000");
 
             this.RuleFor(v => v.Currency)
                 .NotNull()

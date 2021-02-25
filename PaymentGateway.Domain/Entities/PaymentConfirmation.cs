@@ -1,5 +1,4 @@
 using System;
-using PaymentGateway.Domain.Enums;
 
 namespace PaymentGateway.Domain.Entities
 {
@@ -9,7 +8,6 @@ namespace PaymentGateway.Domain.Entities
         public string Status { get; set; }
         public long Amount { get; set; }
         public string Currency { get; set; }
-        public PaymentMethodType Type { get; set; }
         public string CardBrand { get; set; }
         public string CardCountry { get; set; }
         public int CardExpiryYear { get; set; }
@@ -21,7 +19,6 @@ namespace PaymentGateway.Domain.Entities
             Status = status,
             Amount = demand.Amount,
             Currency = demand.Currency,
-            Type = demand.PaymentMethod.Type,
             CardBrand = demand.PaymentMethod.Brand,
             CardCountry = demand.PaymentMethod.Country,
             CardExpiryYear = demand.PaymentMethod.ExpiryYear,

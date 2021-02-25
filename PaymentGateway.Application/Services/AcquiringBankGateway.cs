@@ -16,7 +16,7 @@ namespace PaymentGateway.Application.Services
         /// </summary>
         /// <param name="paymentDemand">Payment demand containing the payment method</param>
         /// <returns></returns>
-        public async Task<PaymentConfirmation> ProcessPaymentAsync(PaymentDemand paymentDemand)
+        public async Task<string> ProcessPaymentAsync(PaymentDemand paymentDemand)
         {
             //This class is a mock of the Acquiring bank processing
             //I will use it also to setup specific Tests cases to vary responses
@@ -24,32 +24,30 @@ namespace PaymentGateway.Application.Services
 
             if (!(IsMasterCard(paymentDemand.PaymentMethod) || IsVisa(paymentDemand.PaymentMethod)))
             {
-                return PaymentConfirmation.FromPaymentDemand(paymentDemand, PaymentConfirmationCode.PaymentDeclinedCardNotSupported);
+                return PaymentConfirmationCode.PaymentDeclinedCardNotSupported;
             }
 
-            if (paymentDemand.Amount > 1000000000)
+            if (paymentDemand.Amount > 1000000)
             {
-                return PaymentConfirmation.FromPaymentDemand(paymentDemand, PaymentConfirmationCode.PaymentDeclinedInsufficientFunds);
+                return PaymentConfirmationCode.PaymentDeclinedInsufficientFunds;
             }
 
             if (IsStolenCard(paymentDemand.PaymentMethod))
             {
-                return PaymentConfirmation.FromPaymentDemand(paymentDemand, PaymentConfirmationCode.PaymentDeclinedCardStolen);
+                return PaymentConfirmationCode.PaymentDeclinedCardStolen;
             }
 
             if (IsMasterCard(paymentDemand.PaymentMethod))
             {
-                return PaymentConfirmation.FromPaymentDemand(paymentDemand,
-                    GetMastercardCheckConfirmation(paymentDemand.PaymentMethod));
+                return GetMastercardCheckConfirmation(paymentDemand.PaymentMethod);
             }
 
             if (IsVisa(paymentDemand.PaymentMethod))
             {
-                return PaymentConfirmation.FromPaymentDemand(paymentDemand,
-                    GetVisaCheckConfirmation(paymentDemand.PaymentMethod));
+                return GetVisaCheckConfirmation(paymentDemand.PaymentMethod);
             }
 
-            return PaymentConfirmation.FromPaymentDemand(paymentDemand, PaymentConfirmationCode.PaymentAccepted);
+            return PaymentConfirmationCode.PaymentAccepted;
         }
 
         private static bool IsMasterCard(PaymentMethod card) => RemoveWhiteSpaces(card.Brand.ToUpperInvariant()) is "MASTERCARD";

@@ -35,7 +35,8 @@ namespace PaymentGateway.Application.Commands
         public async Task<PaymentConfirmation> ExecuteAsync(PaymentDemand command)
         {
             this.Validate(command);
-            var paymentConfirmation = await this.acquiringBankGateway.ProcessPaymentAsync(command);
+            var status = await this.acquiringBankGateway.ProcessPaymentAsync(command);
+            var paymentConfirmation = PaymentConfirmation.FromPaymentDemand(command, status);
             var saveResult = this.SavePaymentConfirmation(paymentConfirmation);
             this.ThrowExceptionIfPaymentDeclined(paymentConfirmation);
             return paymentConfirmation;

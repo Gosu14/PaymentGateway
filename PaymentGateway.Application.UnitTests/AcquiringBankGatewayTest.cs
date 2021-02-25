@@ -62,13 +62,7 @@ namespace PaymentGateway.Application.UnitTests
             var result = await this.AcquiringBankGateway.ProcessPaymentAsync(this.ValidPaymentVisa);
 
             //Assert
-            Assert.Equal(PaymentConfirmationCode.PaymentAccepted, result.Status);
-            Assert.Equal(this.ValidPaymentVisa.Currency, result.Currency);
-            Assert.Equal(this.ValidPaymentVisa.Amount, result.Amount);
-            Assert.Equal(this.ValidPaymentVisa.PaymentMethod.Brand, result.CardBrand);
-            Assert.Equal(this.ValidPaymentVisa.PaymentMethod.Country, result.CardCountry);
-            Assert.Equal(this.ValidPaymentVisa.PaymentMethod.ExpiryYear, result.CardExpiryYear);
-            Assert.Equal(this.ValidPaymentVisa.PaymentMethod.Number[^4..], result.Last4);
+            Assert.Equal(PaymentConfirmationCode.PaymentAccepted, result);
         }
 
         [Fact]
@@ -78,13 +72,7 @@ namespace PaymentGateway.Application.UnitTests
             var result = await this.AcquiringBankGateway.ProcessPaymentAsync(this.ValidPaymentMastercard);
 
             //Assert
-            Assert.Equal(PaymentConfirmationCode.PaymentAccepted, result.Status);
-            Assert.Equal(this.ValidPaymentMastercard.Currency, result.Currency);
-            Assert.Equal(this.ValidPaymentMastercard.Amount, result.Amount);
-            Assert.Equal(this.ValidPaymentMastercard.PaymentMethod.Brand, result.CardBrand);
-            Assert.Equal(this.ValidPaymentMastercard.PaymentMethod.Country, result.CardCountry);
-            Assert.Equal(this.ValidPaymentMastercard.PaymentMethod.ExpiryYear, result.CardExpiryYear);
-            Assert.Equal(this.ValidPaymentMastercard.PaymentMethod.Number[^4..], result.Last4);
+            Assert.Equal(PaymentConfirmationCode.PaymentAccepted, result);
         }
 
         [Fact]
@@ -99,17 +87,11 @@ namespace PaymentGateway.Application.UnitTests
 
             //Assert
             Assert.NotNull(result);
-            Assert.Equal(PaymentConfirmationCode.PaymentDeclinedCardNotSupported, result.Status);
-            Assert.Equal(unmanagedCard.Currency, result.Currency);
-            Assert.Equal(unmanagedCard.Amount, result.Amount);
-            Assert.Equal(unmanagedCard.PaymentMethod.Brand, result.CardBrand);
-            Assert.Equal(unmanagedCard.PaymentMethod.Country, result.CardCountry);
-            Assert.Equal(unmanagedCard.PaymentMethod.ExpiryYear, result.CardExpiryYear);
-            Assert.Equal(unmanagedCard.PaymentMethod.Number[^4..], result.Last4);
+            Assert.Equal(PaymentConfirmationCode.PaymentDeclinedCardNotSupported, result);
         }
 
         [Fact]
-        public async Task ShouldDeclinePaymentIfCvvIsWrong()
+        public async Task ShouldDeclinePaymentIfCvvIsInvalid()
         {
             //Arrange
             var unmanagedCard = this.ValidPaymentMastercard;
@@ -120,17 +102,11 @@ namespace PaymentGateway.Application.UnitTests
 
             //Assert
             Assert.NotNull(result);
-            Assert.Equal(PaymentConfirmationCode.PaymentDeclinedCardInvalidCvv, result.Status);
-            Assert.Equal(unmanagedCard.Currency, result.Currency);
-            Assert.Equal(unmanagedCard.Amount, result.Amount);
-            Assert.Equal(unmanagedCard.PaymentMethod.Brand, result.CardBrand);
-            Assert.Equal(unmanagedCard.PaymentMethod.Country, result.CardCountry);
-            Assert.Equal(unmanagedCard.PaymentMethod.ExpiryYear, result.CardExpiryYear);
-            Assert.Equal(unmanagedCard.PaymentMethod.Number[^4..], result.Last4);
+            Assert.Equal(PaymentConfirmationCode.PaymentDeclinedCardInvalidCvv, result);
         }
 
         [Fact]
-        public async Task ShouldDeclinePaymentIfCardExpiryMonthIsWrong()
+        public async Task ShouldDeclinePaymentIfCardExpiryMonthIsInvalid()
         {
             //Arrange
             var unmanagedCard = this.ValidPaymentMastercard;
@@ -141,17 +117,11 @@ namespace PaymentGateway.Application.UnitTests
 
             //Assert
             Assert.NotNull(result);
-            Assert.Equal(PaymentConfirmationCode.PaymentDeclinedCardInvalidExpiryMonth, result.Status);
-            Assert.Equal(unmanagedCard.Currency, result.Currency);
-            Assert.Equal(unmanagedCard.Amount, result.Amount);
-            Assert.Equal(unmanagedCard.PaymentMethod.Brand, result.CardBrand);
-            Assert.Equal(unmanagedCard.PaymentMethod.Country, result.CardCountry);
-            Assert.Equal(unmanagedCard.PaymentMethod.ExpiryYear, result.CardExpiryYear);
-            Assert.Equal(unmanagedCard.PaymentMethod.Number[^4..], result.Last4);
+            Assert.Equal(PaymentConfirmationCode.PaymentDeclinedCardInvalidExpiryMonth, result);
         }
 
         [Fact]
-        public async Task ShouldDeclinePaymentIfCardExpiryYearIsWrong()
+        public async Task ShouldDeclinePaymentIfCardExpiryYearIsInvalid()
         {
             //Arrange
             var unmanagedCard = this.ValidPaymentMastercard;
@@ -162,13 +132,7 @@ namespace PaymentGateway.Application.UnitTests
 
             //Assert
             Assert.NotNull(result);
-            Assert.Equal(PaymentConfirmationCode.PaymentDeclinedCardInvalidExpiryYear, result.Status);
-            Assert.Equal(unmanagedCard.Currency, result.Currency);
-            Assert.Equal(unmanagedCard.Amount, result.Amount);
-            Assert.Equal(unmanagedCard.PaymentMethod.Brand, result.CardBrand);
-            Assert.Equal(unmanagedCard.PaymentMethod.Country, result.CardCountry);
-            Assert.Equal(unmanagedCard.PaymentMethod.ExpiryYear, result.CardExpiryYear);
-            Assert.Equal(unmanagedCard.PaymentMethod.Number[^4..], result.Last4);
+            Assert.Equal(PaymentConfirmationCode.PaymentDeclinedCardInvalidExpiryYear, result);
         }
 
         [Fact]
@@ -179,13 +143,7 @@ namespace PaymentGateway.Application.UnitTests
 
             //Assert
             Assert.NotNull(result);
-            Assert.Equal(PaymentConfirmationCode.PaymentDeclinedCardStolen, result.Status);
-            Assert.Equal(this.PaymentWithStolenCard.Currency, result.Currency);
-            Assert.Equal(this.PaymentWithStolenCard.Amount, result.Amount);
-            Assert.Equal(this.PaymentWithStolenCard.PaymentMethod.Brand, result.CardBrand);
-            Assert.Equal(this.PaymentWithStolenCard.PaymentMethod.Country, result.CardCountry);
-            Assert.Equal(this.PaymentWithStolenCard.PaymentMethod.ExpiryYear, result.CardExpiryYear);
-            Assert.Equal(this.PaymentWithStolenCard.PaymentMethod.Number[^4..], result.Last4);
+            Assert.Equal(PaymentConfirmationCode.PaymentDeclinedCardStolen, result);
         }
 
         [Fact]
@@ -193,20 +151,14 @@ namespace PaymentGateway.Application.UnitTests
         {
             //Arrange
             var unmanagedCard = this.ValidPaymentMastercard;
-            unmanagedCard.Amount = 1000000001;
+            unmanagedCard.Amount = 1000001;
 
             //Act
             var result = await this.AcquiringBankGateway.ProcessPaymentAsync(unmanagedCard);
 
             //Assert
             Assert.NotNull(result);
-            Assert.Equal(PaymentConfirmationCode.PaymentDeclinedInsufficientFunds, result.Status);
-            Assert.Equal(unmanagedCard.Currency, result.Currency);
-            Assert.Equal(unmanagedCard.Amount, result.Amount);
-            Assert.Equal(unmanagedCard.PaymentMethod.Brand, result.CardBrand);
-            Assert.Equal(unmanagedCard.PaymentMethod.Country, result.CardCountry);
-            Assert.Equal(unmanagedCard.PaymentMethod.ExpiryYear, result.CardExpiryYear);
-            Assert.Equal(unmanagedCard.PaymentMethod.Number[^4..], result.Last4);
+            Assert.Equal(PaymentConfirmationCode.PaymentDeclinedInsufficientFunds, result);
         }
     }
 }

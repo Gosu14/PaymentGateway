@@ -6,6 +6,6 @@ namespace PaymentGateway.Domain.Interfaces
 {
     public interface IAcquiringBankGateway
     {
-        public Task<PaymentConfirmation> ProcessPaymentAsync(PaymentDemand paymentDemand);
+        public Task<string> ProcessPaymentAsync(PaymentDemand paymentDemand);
     }
 }
